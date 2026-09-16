@@ -1,0 +1,93 @@
+# Spectral ruleset for the flatin.pt public API (https://flatin.pt/api/openapi.json).
+#
+# Extends the standard OpenAPI ruleset and adds the rules the API is held to:
+# versioned lowercase paths, HTTPS servers, English summaries, a contact and a
+# licence, no authentication schemes. Checked with spectral-cli 6 on 2026-09-16:
+# no findings.
+#
+# Run: npx @stoplight/spectral-cli lint https://flatin.pt/api/openapi.json \
+#        --ruleset https://flatin.pt/api/spectral.yaml
+extends:
+  - spectral:oas
+rules:
+  flatin-paths-versioned:
+    description: Every public path lives under /api/v1/, so a breaking change can ship as /api/v2/ next to it.
+    message: "{{property}} is not under /api/v1/"
+    severity: error
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^/api/v1/"
+
+  flatin-paths-lowercase:
+    description: Path segments are lowercase; parameters are the only exception.
+    message: "{{property}} has uppercase letters outside a parameter"
+    severity: warn
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        match: "^(/([a-z0-9._-]+|\\{[A-Za-z_]+\\}))+$"
+
+  flatin-servers-https:
+    description: Servers are reached over HTTPS only.
+    severity: error
+    given: $.servers[*].url
+    then:
+      function: pattern
+      functionOptions:
+        match: "^https://"
+
+  flatin-operation-summary:
+    description: Every operation has a short English summary; catalogs and MCP clients show it as the name.
+    severity: error
+    given: $.paths[*][get,post,put,patch,delete]
+    then:
+      field: summary
+      function: truthy
+
+  flatin-summary-length:
+    description: Summaries stay short enough to fit a catalog card.
+    severity: warn
+    given: $.paths[*][get,post,put,patch,delete].summary
+    then:
+      function: length
+      functionOptions:
+        max: 80
+
+  flatin-info-license:
+    description: The licence of the data is stated in the schema itself.
+    severity: warn
+    given: $.info
+    then:
+      field: license.name
+      function: truthy
+
+  flatin-info-contact-email:
+    description: A reachable contact address is in the schema.
+    severity: warn
+    given: $.info.contact
+    then:
+      field: email
+      function: truthy
+
+  flatin-no-security-schemes:
+    description: The API is keyless by design; a security scheme would promise authentication that does not exist.
+    severity: info
+    given: $.components
+    then:
+      field: securitySchemes
+      function: falsy
+
+  flatin-no-trailing-slash:
+    description: Paths do not end with a slash.
+    severity: info
+    given: $.paths
+    then:
+      field: "@key"
+      function: pattern
+      functionOptions:
+        notMatch: ".+/$"

@@ -1,0 +1,16 @@
+generated: '2026-09-16'
+method: generated
+source: >-
+  Generated from openapi/flatin-pt-openapi.json operationIds and the live MCP tools. Steps are
+  grounded in real operations; no endpoints or parameters were invented.
+skills:
+  - name: calculate-portugal-purchase-cost
+    file: flatin-pt-calculate-purchase-cost.md
+    api: flatin.pt API
+    operations: [imt_calculate_api_v1_imt_calculate_post]
+    mcp_tools: [imt_calculate]
+  - name: lookup-imi-rate
+    file: flatin-pt-lookup-imi-rate.md
+    api: flatin.pt API
+    operations: [imi_rate_api_v1_imi_rates__codigo__get, imi_rates_api_v1_imi_rates_get, imi_rates_csv_api_v1_imi_rates_csv_get]
+    mcp_tools: [imi_rate, imi_annual_cost]

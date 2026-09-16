@@ -1,0 +1,29 @@
+generated: '2026-09-16'
+method: probed
+source: https://flatin.pt/api/rate-limits.json
+humanURL: https://flatin.pt/en/tools/api-and-data/#rules
+description: >-
+  Enforced request limits for the flatin.pt REST API and MCP server, read from the provider's
+  machine-readable API Commons Rate Limits document. Keyless — limits apply per client IP over a
+  sliding 60-second window.
+status_code_on_exhaustion: 429
+response_headers:
+  - Retry-After
+limit_count: 2
+limits:
+  - tier: free
+    name: REST API
+    scope: ip-address
+    metric: requests
+    limit: 120
+    window: minute
+    burst: null
+    applies: https://flatin.pt/api/v1
+  - tier: free
+    name: MCP server
+    scope: ip-address
+    metric: requests
+    limit: 60
+    window: minute
+    burst: null
+    applies: https://flatin.pt/mcp

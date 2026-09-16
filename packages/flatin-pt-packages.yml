@@ -1,0 +1,42 @@
+generated: '2026-09-16'
+method: searched
+source: >-
+  github.com/flatinpt org repos and the flatin.pt changelog. No packages are published to npm,
+  PyPI, Packagist or the Chrome Web Store as of 2026-09-16 — all three first-party clients are
+  distributed from GitHub. npm/PyPI lookups for flatin/flatin-mcp returned 404.
+packages:
+  - name: flatin-mcp
+    kind: mcp-stdio-bridge
+    language: javascript
+    official: true
+    registry: git
+    repository: https://github.com/flatinpt/mcp
+    install: npx -y github:flatinpt/mcp
+    version: 1.0.0
+    published: '2026-09-16'
+    license: MIT
+    note: >-
+      MCP stdio bridge to the remote flatin.pt MCP server; no npm publication, installed straight
+      from GitHub via npx. Version read from package.json; published date from the repo push.
+  - name: flatin.pt — IMT & IMI calculators (WordPress plugin)
+    kind: wordpress-plugin
+    language: php
+    official: true
+    registry: git
+    repository: https://github.com/flatinpt/wp
+    version: 1.0.0
+    published: '2026-09-16'
+    note: >-
+      First-party WordPress plugin embedding the IMT/IMI calculators; distributed from GitHub, not
+      the WordPress.org plugin directory. Version read from the plugin header.
+  - name: flatin.pt — IMT & IMI on listings (Chrome extension)
+    kind: browser-extension
+    language: javascript
+    official: true
+    registry: git
+    repository: https://github.com/flatinpt/chrome
+    version: 1.0.0
+    published: '2026-09-16'
+    note: >-
+      First-party Chrome extension that annotates property listings with IMT/IMI; distributed from
+      GitHub, not the Chrome Web Store. Version read from src/manifest.json.

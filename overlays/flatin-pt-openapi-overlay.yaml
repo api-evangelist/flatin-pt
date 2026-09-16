@@ -1,0 +1,32 @@
+overlay: 1.0.0
+info:
+  title: flatin.pt API — API Evangelist enrichment overlay
+  version: 1.0.0
+extends: ../openapi/flatin-pt-openapi.json
+x-provenance:
+  generated: '2026-09-16'
+  method: generated
+  source: >-
+    Non-destructive enhancements over the harvested flatin.pt OpenAPI, capturing runtime facts the
+    provider documents outside the spec (rate limits, MCP surface, dataset licence). Does not mutate
+    the original document.
+actions:
+  - target: $.info
+    description: Record the sibling agent + data surfaces and the rate-limit posture.
+    update:
+      x-mcp-server: https://flatin.pt/mcp
+      x-llms-txt: https://flatin.pt/llms.txt
+      x-apis-json: https://flatin.pt/.well-known/apis.json
+      x-rate-limits: https://flatin.pt/api/rate-limits.json
+      x-status-page: https://flatin.pt/status.json
+  - target: $.paths['/api/v1/imi/rates.csv'].get
+    description: Flag the CSV endpoint as the open-data bulk download to prefer over row-by-row calls.
+    update:
+      x-dataset: true
+      x-license: CC BY 4.0
+      x-bulk-download: true
+  - target: $.paths['/api/v1/imt/calculate'].post
+    description: Note that the POST is a pure, stateless calculation with no side effects.
+    update:
+      x-side-effect-free: true
+      x-idempotent: true

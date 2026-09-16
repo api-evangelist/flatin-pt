@@ -1,0 +1,16 @@
+generated: '2026-09-16'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: flatin.pt
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Dec  6 22:56:22 2026 GMT
+  hsts: false
+domains:
+- domain: flatin.pt
+  dnssec: false
+  caa: []
+  spf: true
+  dmarc: true
+  dmarc_policy: none

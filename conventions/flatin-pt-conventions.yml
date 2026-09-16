@@ -1,0 +1,46 @@
+generated: '2026-09-16'
+method: derived
+source: >-
+  Derived from openapi/flatin-pt-openapi.json plus the provider's docs
+  (https://flatin.pt/en/tools/api-and-data/#rules), rate-limits.json and status page.
+summary: >-
+  Cross-cutting runtime semantics for the keyless flatin.pt REST API. The surface is read-only
+  compute: three GET reads and one stateless POST calculation, no persisted resources.
+authentication:
+  style: none
+  note: Anonymous over HTTPS; throttled per client IP. See authentication/flatin-pt-authentication.yml.
+versioning:
+  style: uri-path
+  current: v1
+  note: Every path lives under /api/v1/; a breaking change would ship as /api/v2/ (enforced by the provider's Spectral rule flatin-paths-versioned).
+pagination:
+  style: none
+  note: The IMI list returns all 308 municipalities in one response; the whole table is also one CC BY 4.0 CSV file, so there is nothing to page.
+error_envelope:
+  style: fastapi-validation
+  media_type: application/json
+  note: >-
+    422 validation errors use the FastAPI {"detail":[{loc,msg,type}]} shape (see
+    errors/flatin-pt-problem-types.yml). This is not RFC 9457 problem+json. The docs note IMT input
+    errors return 422 with `error` and `field`.
+rate_limit_signaling:
+  status_code: 429
+  headers: [Retry-After]
+  note: 120 req/min per IP on REST, 60 on MCP; sliding 60-second window. See rate-limits/flatin-pt-rate-limits.yml.
+request_id: none
+metadata:
+  attribution: Every successful JSON answer carries an `attribution` field to display next to the numbers.
+idempotency:
+  coverage: na
+  note: >-
+    No write/mutation surface. The single POST (/api/v1/imt/calculate) is a pure, stateless tax
+    calculation with no side effects — naturally idempotent, and no Idempotency-Key header exists
+    or is needed. No replay protection applies because nothing is persisted.
+reversibility:
+  applicable: na
+  note: >-
+    Read-only compute API. No create/update/delete operations exist, so there is nothing to reverse.
+    request_consultation (MCP-only) merely returns a form link; the person submits the form themselves.
+dry_run:
+  applicable: na
+  note: The POST performs a calculation only and changes no state, so a dry-run mode is not meaningful.

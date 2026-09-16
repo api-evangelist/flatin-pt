@@ -1,0 +1,31 @@
+generated: '2026-09-16'
+method: searched
+source: >-
+  openapi/flatin-pt-openapi.json, https://flatin.pt/api/changelog.json,
+  https://flatin.pt/status/ and https://flatin.pt/status.json, and the docs
+  at https://flatin.pt/en/tools/api-and-data/#rules.
+versioning:
+  scheme: uri-path
+  current: v1
+  spec_version: 1.0.0
+  policy: >-
+    Paths are versioned under /api/v1/; a breaking change ships as a new version prefix. Enforced by
+    the provider's own Spectral ruleset (flatin-paths-versioned).
+deprecation:
+  policy: none-published
+  headers: none
+  note: No RFC 8594 Sunset/Deprecation headers and no deprecated operations in the OpenAPI as of 2026-09-16.
+status_page:
+  url: https://flatin.pt/status/
+  machine_url: https://flatin.pt/status.json
+  note: >-
+    Live status page with a machine-readable status.json (status operational; components rest_api,
+    mcp, database each reporting latency; data block reports imi_tax_year 2025, 308 municipalities,
+    source-checked 2026-09-12).
+changelog:
+  url: https://flatin.pt/api/changelog.json
+  human_url: https://flatin.pt/status/#changelog
+  note: Dated change log; no breaking changes recorded. See changelog/flatin-pt-changelog.yml.
+sla:
+  published: false
+deprecated_operations: []

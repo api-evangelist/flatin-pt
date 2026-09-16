@@ -1,0 +1,46 @@
+generated: '2026-09-16'
+method: derived
+source: >-
+  Derived by binding the live MCP tools (probed at https://flatin.pt/mcp) to the OpenAPI
+  operations in openapi/flatin-pt-openapi.json. Both surfaces are keyless and first-party.
+surfaces:
+  openapi: openapi/flatin-pt-openapi.json
+  mcp: https://flatin.pt/mcp
+  gated: false
+crosswalk:
+  - tool: imt_calculate
+    category: calculation
+    rest: [imt_calculate_api_v1_imt_calculate_post]
+    binding: direct
+    confidence: high
+    note: >-
+      MCP tool maps 1:1 to POST /api/v1/imt/calculate. Body fields value/territory/primary_home/
+      buyer_is_young match the tool inputSchema. The tool inherits that operation's requestBody.
+  - tool: imi_rate
+    category: lookup
+    rest: [imi_rate_api_v1_imi_rates__codigo__get]
+    binding: direct
+    confidence: high
+    note: >-
+      Maps to GET /api/v1/imi/rates/{codigo}; the tool's `municipality` argument is the {codigo}
+      path parameter (four-digit code or name).
+mcp_only:
+  - tool: imi_annual_cost
+    reason: >-
+      Composite calculation (municipality rate x VPT). No dedicated REST operation exists; it is
+      computed server-side from the same IMI rate table that GET /api/v1/imi/rates/{codigo} exposes.
+  - tool: request_consultation
+    reason: >-
+      Returns a form link and localized GDPR consent text; there is no public REST operation, and
+      the actual submission is made by the person via the web form, not by the API.
+rest_only:
+  - operation: imi_rates_api_v1_imi_rates_get
+    reason: Bulk list of all 308 municipalities' IMI rates (JSON); no single-tool equivalent (MCP uses per-municipality imi_rate).
+  - operation: imi_rates_csv_api_v1_imi_rates_csv_get
+    reason: Full IMI rate table as a CC BY 4.0 CSV dataset; a data download, not an agent tool.
+coverage:
+  mcp_tools: 4
+  bound_to_rest: 2
+  mcp_only: 2
+  rest_operations: 4
+  rest_only: 2

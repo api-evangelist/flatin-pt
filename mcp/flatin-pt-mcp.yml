@@ -1,0 +1,65 @@
+generated: '2026-09-16'
+method: searched
+source: >-
+  Live tools/list probe of https://flatin.pt/mcp (HTTP 200, 4 tools with inputSchema),
+  the official MCP Registry entry pt.flatin/property-taxes, and github.com/flatinpt/mcp.
+name: flatin.pt Property Taxes MCP
+registry_name: pt.flatin/property-taxes
+registry: https://registry.modelcontextprotocol.io/v0/servers?search=flatin
+description: >-
+  Remote Model Context Protocol server for Portuguese property taxes — IMT/stamp duty on a
+  purchase and IMI rates for all 308 municipalities. Keyless, stateless Streamable HTTP.
+deployment:
+  mode: both
+  endpoint: https://flatin.pt/mcp
+  transport: streamable-http
+  install: npx -y github:flatinpt/mcp
+  package: https://github.com/flatinpt/mcp
+  auth: none
+  verified: probed
+  note: >-
+    Remote endpoint answers tools/list anonymously (probed 2026-09-16). A first-party stdio
+    bridge (flatin-mcp 1.0.0) is published on GitHub for clients that can only spawn a local
+    process; it is installed via npx github:flatinpt/mcp, not from npm. GET on the endpoint
+    returns 405 (no SSE); the server checks the MCP protocol revision and 400s on an unknown one.
+tools:
+  - name: imt_calculate
+    description: >-
+      What buying a home in Portugal costs on top of the price: IMT (property transfer tax),
+      Imposto do Selo (stamp duty) and an estimate for the deed and registration. Official 2026
+      tables, including the reduced scale for buyers aged 35 or under. Amounts in cents and in euros.
+    input_schema:
+      type: object
+      required: [value]
+      properties:
+        value: { type: string, description: 'Property price in euros, e.g. 250000 or 250000.50' }
+        territory: { type: string, enum: [continente, regioes_autonomas], description: 'Mainland (continente) or Azores/Madeira (regioes_autonomas). Default continente' }
+        primary_home: { type: boolean, description: "Buyer's own permanent home. Default true" }
+        buyer_is_young: { type: boolean, description: 'Buyer is 35 or under, first home; only when primary_home. Default false' }
+  - name: imi_rate
+    description: >-
+      The yearly property tax (IMI) rate in one Portuguese municipality, by name or four-digit
+      code. Where a municipality sets no single rate (per parish), the answer says so instead of zero.
+    input_schema:
+      type: object
+      required: [municipality]
+      properties:
+        municipality: { type: string, description: 'Municipality name (Porto) or four-digit code (1312)' }
+  - name: imi_annual_cost
+    description: >-
+      Yearly IMI for an urban property with a given taxable value (VPT) in one municipality, at
+      that municipality's urban rate. VPT is the tax authority's valuation, not the purchase price.
+    input_schema:
+      type: object
+      required: [municipality, vpt]
+      properties:
+        municipality: { type: string, description: 'Municipality name or four-digit code' }
+        vpt: { type: string, description: 'Valor Patrimonial Tributario — taxable value in euros, not the purchase price' }
+  - name: request_consultation
+    description: >-
+      How to put the user in touch with a licensed real estate agency in Portugal: returns the
+      form link and the GDPR (RGPD) consent text in the user's language. Submitted by the person.
+    input_schema:
+      type: object
+      properties:
+        language: { type: string, description: "User's language: pt, en, ru, ua, de, fr, nl. Default en" }

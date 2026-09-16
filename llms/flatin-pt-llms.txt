@@ -1,0 +1,33 @@
+# flatin.pt
+
+> Portuguese property taxes, explained and computed: IMT (property transfer tax), Imposto do Selo (stamp duty) and IMI (yearly municipal property tax) for all 308 municipalities. flatin.pt is not a real estate agency; it connects buyers with licensed agencies in Portugal.
+
+The site is available in Portuguese, English, Russian, Ukrainian, German, French and Dutch. Numbers on the site, in the API and in the MCP server come from the same code and the same official tables.
+
+## Machine access (no key, no sign-up)
+
+- [API and data](https://flatin.pt/en/tools/api-and-data/): REST API, MCP server and open dataset in one page
+- [OpenAPI schema](https://flatin.pt/api/openapi.json): REST API v1 at https://flatin.pt/api/v1
+- [IMI rates CSV](https://flatin.pt/api/v1/imi/rates.csv): all 308 municipalities, CC BY 4.0
+- MCP server (Streamable HTTP): https://flatin.pt/mcp — registry name pt.flatin/property-taxes
+- [APIs.json index](https://flatin.pt/.well-known/apis.json)
+- [Rate limits](https://flatin.pt/api/rate-limits.json): 120 requests/min per IP on REST, 60 on MCP
+- [Status](https://flatin.pt/status/) and [changelog](https://flatin.pt/api/changelog.json)
+
+## MCP tools
+
+- `imt_calculate`: What buying a home in Portugal costs on top of the price: IMT (property transfer tax), Imposto do Selo (stamp duty) and an estimate for the deed and registration. Official 2026 tables, including the reduced scale for buyers aged 35 or under. Returns amounts in cents and formatted in euros, with the source of the tables.
+- `imi_rate`: The yearly property tax (IMI) rate in one Portuguese municipality, by name or four-digit code. Collected from the Autoridade Tributária portal and checked line by line for all 308 municipalities. Where a municipality sets no single rate (it is set per parish), the answer says so instead of returning zero.
+- `imi_annual_cost`: Yearly IMI for an urban property (prédio urbano) with a given taxable value (VPT) in one municipality, at the municipality's urban rate. VPT is the tax authority's valuation, not the purchase price: ask the user for it instead of using the price.
+- `request_consultation`: How to put the user in touch with a licensed real estate agency in Portugal: returns the form link and the GDPR (RGPD) consent text in the user's language. The request is submitted by the person, not on their behalf.
+
+## Guides and tools for people
+
+- [IMT calculator](https://flatin.pt/en/tools/imt-calculator/)
+- [IMI rates, open data](https://flatin.pt/en/tools/imi-open-data/)
+- [Buying property in Portugal: costs and taxes](https://flatin.pt/en/guides/buying-property-portugal-costs-taxes/)
+
+## Legal
+
+- [Terms of use](https://flatin.pt/en/legal/termos-utilizacao/)
+- [Privacy policy](https://flatin.pt/en/legal/privacidade/)

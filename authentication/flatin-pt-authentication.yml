@@ -1,0 +1,18 @@
+generated: '2026-09-16'
+method: searched
+source: >-
+  openapi/flatin-pt-openapi.json (no securitySchemes), well-known/flatin-pt-api-onboarding.json
+  (authentication.methods: anonymous/none) and the developer docs at
+  https://flatin.pt/en/tools/api-and-data/#rest.
+summary: >-
+  Keyless public API. There is no authentication of any kind — no API keys, no OAuth, no accounts.
+  Access is anonymous over HTTPS and throttled per client IP address.
+schemes:
+  - id: anonymous
+    type: none
+    description: No credential required. Call https://flatin.pt/api/v1 or connect an MCP client to https://flatin.pt/mcp directly.
+account_required: false
+agent_policy: allowed
+notes:
+  - The MCP server at https://flatin.pt/mcp is also anonymous; no OAuth authorization-server or protected-resource metadata is served (both /.well-known probes returned 404).
+  - Every successful JSON answer carries an attribution field that must be displayed next to the numbers (a licence condition, not an auth condition).

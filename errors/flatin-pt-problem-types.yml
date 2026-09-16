@@ -1,0 +1,30 @@
+generated: '2026-09-16'
+method: derived
+source: >-
+  Derived from the 4xx/5xx responses in openapi/flatin-pt-openapi.json and the error notes in the
+  developer docs (https://flatin.pt/en/tools/api-and-data/#rest).
+format: fastapi-validation
+media_type: application/json
+note: >-
+  Errors are NOT RFC 9457 problem+json. Validation errors use the FastAPI envelope
+  {"detail":[{"loc":[...],"msg":"...","type":"..."}]}. The docs state IMT input errors return 422
+  with `error` and `field`. 429 (rate limit) carries a Retry-After header.
+problem_types:
+  - status: 422
+    title: Validation Error
+    schema: '#/components/schemas/HTTPValidationError'
+    applies_to: [imi_rates_api_v1_imi_rates_get, imi_rates_csv_api_v1_imi_rates_csv_get, imi_rate_api_v1_imi_rates__codigo__get, imt_calculate_api_v1_imt_calculate_post]
+    meaning: Request parameters or body failed validation (e.g. bad year, invalid IMT value/territory).
+    remediation: Correct the offending field named in detail[].loc / the docs' `field`, and retry.
+  - status: 404
+    title: Municipality not found
+    applies_to: [imi_rate_api_v1_imi_rates__codigo__get]
+    meaning: Unknown municipality code or name.
+    remediation: Use a valid four-digit code or name; the 404 body links to the full list.
+    note: Documented behaviour in the OpenAPI operation description; not modelled as a response object in the spec.
+  - status: 429
+    title: Too Many Requests
+    applies_to: [all]
+    meaning: Per-IP rate limit exceeded (120/min REST, 60/min MCP).
+    remediation: Wait for the number of seconds in the Retry-After header, then retry.
+    note: Documented in rate-limits.json; not modelled as a response object in the spec.

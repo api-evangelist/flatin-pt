@@ -1,0 +1,4 @@
+Contact: mailto:info@flatin.pt
+Expires: 2027-03-15T12:39:13Z
+Preferred-Languages: en, pt
+Canonical: https://flatin.pt/.well-known/security.txt

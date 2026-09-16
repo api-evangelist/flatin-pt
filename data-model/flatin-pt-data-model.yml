@@ -1,0 +1,39 @@
+generated: '2026-09-16'
+method: derived
+source: >-
+  Derived from openapi/flatin-pt-openapi.json operations and their descriptions, plus the MCP tool
+  input schemas. The API models reference data (municipal tax rates) and a computed result, not
+  persisted user resources.
+entities:
+  - name: Municipality
+    key: codigo
+    description: A Portuguese municipality (concelho), identified by a four-digit code or name.
+    fields:
+      - { name: codigo, type: string, note: Four-digit municipality code, e.g. 1312 }
+      - { name: name, type: string }
+      - { name: rate, type: number, note: Yearly urban IMI rate for the tax year; may be absent (available:false) when set per parish }
+      - { name: available, type: boolean }
+      - { name: history, type: array, note: Urban rate by tax year with movement (raised/lowered/unchanged/returned/not_comparable) }
+      - { name: attribution, type: string }
+    source_operations: [imi_rates_api_v1_imi_rates_get, imi_rate_api_v1_imi_rates__codigo__get, imi_rates_csv_api_v1_imi_rates_csv_get]
+  - name: PurchaseCostCalculation
+    description: The taxes and fees due on top of a property purchase price (a computed result, not stored).
+    fields:
+      - { name: value, type: number, note: Purchase price in euros (input) }
+      - { name: territory, type: string, note: continente or regioes_autonomas }
+      - { name: primary_home, type: boolean }
+      - { name: buyer_is_young, type: boolean }
+      - { name: imt, type: number, note: Property transfer tax }
+      - { name: stamp_duty, type: number, note: Imposto do Selo }
+      - { name: deed_registration_estimate, type: number }
+      - { name: attribution, type: string }
+    source_operations: [imt_calculate_api_v1_imt_calculate_post]
+relationships:
+  - from: PurchaseCostCalculation
+    to: Municipality
+    type: references
+    via: none
+    note: >-
+      IMT/stamp duty apply nationally by territory (continente / regioes_autonomas), not by
+      municipality, so the calculation does not join to a specific Municipality row. IMI (Municipality)
+      and IMT (PurchaseCostCalculation) are the two independent property-tax domains this API covers.

@@ -1,0 +1,31 @@
+generated: '2026-09-16'
+method: probed
+source: https://flatin.pt/api/plans.json
+humanURL: https://flatin.pt/en/tools/api-and-data/#rules
+description: >-
+  flatin.pt has one plan and it is free — no key, no account, no payment. Read from the provider's
+  machine-readable API Commons Plans document.
+currency: EUR
+plan_count: 1
+plans:
+  - id: flatin-pt-free
+    name: Free
+    type: free
+    price: '0.00'
+    billing_period: none
+    description: Anonymous access to every REST endpoint and every MCP tool, limited per client IP address.
+    limits:
+      - name: REST API rate limit
+        limit: 120
+        metric: requests
+        window: minute
+        scope: ip-address
+        applies: https://flatin.pt/api/v1
+      - name: MCP server rate limit
+        limit: 60
+        metric: requests
+        window: minute
+        scope: ip-address
+        applies: https://flatin.pt/mcp
+    overage: none
+    note: The open IMI dataset is licensed CC BY 4.0; successful JSON answers carry an attribution field to display next to the numbers.

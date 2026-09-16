@@ -1,0 +1,35 @@
+generated: '2026-09-16'
+method: derived
+source: >-
+  Derived from the served discovery documents and openapi/flatin-pt-openapi.json. Portuguese
+  property tax has no domain-specific API standard, so no domain_standard conformance is asserted
+  (reward-only; absence is not a gap).
+conformance:
+  - id: rfc9727-api-catalog
+    conforms: true
+    evidence: https://flatin.pt/.well-known/api-catalog
+    note: Serves an RFC 9727 api-catalog as application/linkset+json linking OpenAPI, docs, apis.json and status.
+  - id: rfc9116-security-txt
+    conforms: true
+    evidence: https://flatin.pt/.well-known/security.txt
+    note: Serves an RFC 9116 security.txt with Contact, Expires, Preferred-Languages, Canonical.
+  - id: apis-json
+    conforms: true
+    evidence: https://flatin.pt/.well-known/apis.json
+    note: Publishes an APIs.json index (specificationVersion 0.23).
+  - id: mcp
+    conforms: true
+    evidence: https://flatin.pt/mcp
+    note: Remote MCP server (Streamable HTTP) listed in the official MCP Registry as pt.flatin/property-taxes; tools/list probed 200.
+  - id: openapi-3.1
+    conforms: true
+    evidence: https://flatin.pt/api/openapi.json
+    note: Valid OpenAPI 3.1.0 document, lint-clean against the provider's Spectral ruleset.
+  - id: rfc9457-problem-json
+    conforms: false
+    evidence: openapi/flatin-pt-openapi.json
+    note: Errors use the FastAPI validation envelope, not application/problem+json.
+  - id: oauth2
+    conforms: false
+    evidence: https://flatin.pt/.well-known/oauth-authorization-server
+    note: Keyless API; no OAuth (probe 404). Not applicable.

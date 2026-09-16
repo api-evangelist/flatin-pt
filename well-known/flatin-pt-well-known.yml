@@ -1,0 +1,46 @@
+generated: '2026-09-16'
+method: probed
+source: live probes of /.well-known/* and discovery paths on the flatin.pt host
+hosts:
+  - host: flatin.pt
+    documents:
+      - path: /.well-known/apis.json
+        status: 200
+        file: flatin-pt-apis.json
+        note: APIs.json index (specificationVersion 0.23) cataloguing three APIs and a full common[] link set.
+      - path: /.well-known/api-catalog
+        status: 200
+        file: flatin-pt-api-catalog.json
+        note: RFC 9727 linkset (application/linkset+json) pointing at the OpenAPI, docs, apis.json and status.
+      - path: /.well-known/api-onboarding
+        status: 200
+        file: flatin-pt-api-onboarding.json
+        note: API Onboarding Descriptor (aod 0.1) — maturity self-serve, no account, agentPolicy allowed, anonymous auth.
+      - path: /.well-known/security.txt
+        status: 200
+        file: flatin-pt-security.txt
+        note: RFC 9116 security.txt with Contact, Expires, Preferred-Languages and Canonical.
+      - path: /.well-known/openid-configuration
+        status: 404
+        file: null
+        note: Not served — API is keyless, no OAuth/OIDC.
+      - path: /.well-known/oauth-authorization-server
+        status: 404
+        file: null
+        note: Not served — keyless API, no OAuth.
+      - path: /.well-known/oauth-protected-resource
+        status: 404
+        file: null
+        note: Not served — keyless API, no OAuth.
+      - path: /.well-known/ai-plugin.json
+        status: 404
+        file: null
+        note: Not served.
+      - path: /.well-known/agent-card.json
+        status: 404
+        file: null
+        note: Not served — provider ships MCP, not an A2A agent card.
+      - path: /.well-known/agent.json
+        status: 404
+        file: null
+        note: Not served (legacy A2A path).

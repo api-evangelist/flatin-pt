@@ -1,0 +1,50 @@
+generated: '2026-09-16'
+method: probed
+source: https://flatin.pt/api/changelog.json
+humanURL: https://flatin.pt/status/#changelog
+scheme: dated
+current_version: 1.0.0
+description: >-
+  Dated change log for the flatin.pt REST API and MCP server, read from the provider's
+  machine-readable API Commons Change Log. No breaking changes recorded to date.
+entries:
+  - date: '2026-09-16'
+    name: Discovery documents, status page, English by default
+    breaking: false
+    tags: [discovery, status, docs]
+    highlights: Published apis.json, RFC 9727 api-catalog, API Onboarding Descriptor, plans.json, rate-limits.json, spectral.yaml, security.txt, llms.txt and a live status page; OpenAPI also served at /openapi.json.
+  - date: '2026-09-16'
+    name: Open-source clients
+    breaking: false
+    tags: [mcp, wordpress, chrome, open-source]
+    highlights: Published the MCP stdio bridge (flatinpt/mcp), the WordPress plugin (flatinpt/wp) and the Chrome extension (flatinpt/chrome); all call this API.
+  - date: '2026-09-16'
+    name: MCP server listed in the official MCP Registry
+    breaking: false
+    tags: [mcp, registry]
+    highlights: The remote server https://flatin.pt/mcp is published in registry.modelcontextprotocol.io as pt.flatin/property-taxes.
+  - date: '2026-09-16'
+    name: All machine answers in English
+    breaking: false
+    tags: [mcp, rest, i18n]
+    highlights: MCP tool descriptions/results, REST errors and 429 refusals in English; request_consultation consent text still localized.
+  - date: '2026-09-15'
+    name: Rate limits
+    breaking: false
+    tags: [rest, mcp, rate-limits]
+    highlights: Per-address limits on REST and MCP; refused requests get HTTP 429 with Retry-After.
+  - date: '2026-09-15'
+    name: MCP protocol version is checked
+    breaking: false
+    tags: [mcp]
+    highlights: Requests declaring an unsupported MCP protocol revision get HTTP 400 with the list of supported revisions.
+  - date: '2026-09-15'
+    name: IMI rate history
+    breaking: false
+    tags: [rest, imi]
+    highlights: GET /api/v1/imi/rates/{codigo} returns a history field — the urban rate by tax year and its movement.
+  - date: '2026-09-13'
+    name: Public REST API v1 and MCP server
+    breaking: false
+    tags: [rest, mcp, imi, imt]
+    highlights: IMI rates for all 308 municipalities (JSON + CSV), IMT/stamp duty calculation, and MCP tools imt_calculate, imi_rate, imi_annual_cost, request_consultation. No key, no sign-up.
