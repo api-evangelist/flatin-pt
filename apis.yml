@@ -10,6 +10,19 @@ created: '2026-09-16'
 modified: '2026-09-16'
 specificationVersion: '0.21'
 tags:
+  - Real-Estate
+  - Property Tax
+  - Tax
+  - IMI
+  - IMT
+  - Stamp Duty
+  - Portugal
+  - Open Data
+  - Government Data
+  - Fiscal Data
+  - MCP
+  - AI Agents
+tags_raw:
   - Real Estate
   - Property Tax
   - Taxes
@@ -32,6 +45,19 @@ apis:
     image: https://flatin.pt/assets/brand/raster/icon-256.png
     position: Producing
     tags:
+      - Real-Estate
+      - Property Tax
+      - Tax
+      - IMI
+      - IMT
+      - Stamp Duty
+      - Portugal
+      - Open Data
+      - Government Data
+      - Fiscal Data
+      - MCP
+      - AI Agents
+    tags_raw:
       - Real Estate
       - Property Tax
       - Taxes
