@@ -4,13 +4,28 @@ description: >-
   purchase-cost calculations, sourced from official Autoridade Tributária tables. flatin.pt serves the same numbers as a
   REST API with an OpenAPI schema, a remote MCP server exposing four agent tools, an llms.txt for agent discovery, and a
   CC BY 4.0 open CSV dataset — no key and no sign-up.
+deliveryModel:
+  model: saas
+  license_evidence:
+    not_product:
+    - flatinpt/mcp
+  open_source: unknown
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: low
+  source:
+  - pricing
+  - repository-not-product
+  generated: '2026-09-25'
+  method: derived
 image: https://flatin.pt/assets/brand/raster/icon-256.png
 url: https://raw.githubusercontent.com/api-evangelist/flatin-pt/refs/heads/main/apis.yml
 created: '2026-09-16'
 modified: '2026-09-16'
 specificationVersion: '0.21'
 tags:
-  - Real-Estate
+  - Real Estate
   - Property Tax
   - Tax
   - IMI
@@ -35,78 +50,46 @@ tags_raw:
   - Fiscal Data
   - MCP
   - AI Agents
+  - Real-Estate
 apis:
-  - name: flatin.pt API
-    description: >-
-      Keyless REST API for Portuguese IMI rates and IMT/stamp duty calculations, with a remote MCP server exposing four
-      agent tools and an llms.txt for agent discovery.
-    humanURL: https://flatin.pt/en/tools/api-and-data/
-    baseURL: https://flatin.pt/api/v1
-    image: https://flatin.pt/assets/brand/raster/icon-256.png
-    position: Producing
-    tags:
-      - Real-Estate
-      - Property Tax
-      - Tax
-      - IMI
-      - IMT
-      - Stamp Duty
-      - Portugal
-      - Open Data
-      - Government Data
-      - Fiscal Data
-      - MCP
-      - AI Agents
-    tags_raw:
-      - Real Estate
-      - Property Tax
-      - Taxes
-      - IMI
-      - IMT
-      - Stamp Duty
-      - Portugal
-      - Open Data
-      - Government Data
-      - Fiscal Data
-      - MCP
-      - AI Agents
-    properties:
-      - type: OpenAPI
-        url: openapi/flatin-pt-openapi.json
-      - type: MCPServer
-        url: mcp/flatin-pt-mcp.yml
-      - type: ToolCrosswalk
-        url: mcp/flatin-pt-tool-crosswalk.yml
-      - type: LLMsTxt
-        url: llms/flatin-pt-llms.txt
-      - type: Overlay
-        url: overlays/flatin-pt-openapi-overlay.yaml
-      - type: Authentication
-        url: authentication/flatin-pt-authentication.yml
-      - type: Conventions
-        url: conventions/flatin-pt-conventions.yml
-      - type: Idempotency
-        url: conventions/flatin-pt-conventions.yml
-      - type: ErrorCatalog
-        url: errors/flatin-pt-problem-types.yml
-      - type: DataModel
-        url: data-model/flatin-pt-data-model.yml
-      - type: Conformance
-        url: conformance/flatin-pt-conformance.yml
-      - type: RateLimits
-        url: rate-limits/flatin-pt-rate-limits.yml
-      - type: Plans
-        url: plans/flatin-pt-plans-pricing.yml
-      - type: ChangeLog
-        url: changelog/flatin-pt-changelog.yml
-      - type: Lifecycle
-        url: lifecycle/flatin-pt-lifecycle.yml
-      - type: AgentSkill
-        url: skills/_index.yml
-      - type: Dataset
-        url: https://flatin.pt/api/v1/imi/rates.csv
-      - type: Documentation
-        url: https://flatin.pt/en/tools/api-and-data/
+- aid: flatin-pt:flatin-pt-public-api
+  name: flatin.pt Public API
+  description: 'Keyless public endpoints: IMI rates and IMT calculation.'
+  humanURL: https://flatin.pt/en/tools/api-and-data/
+  baseURL: https://flatin.pt/api/v1
+  tags:
+  - public
+  properties:
+  - type: OpenAPI
+    url: openapi/flatin-pt-public-api-openapi.yml
+  - type: ToolCrosswalk
+    url: mcp/flatin-pt-tool-crosswalk.yml
+  - type: LLMsTxt
+    url: llms/flatin-pt-llms.txt
+  - type: Authentication
+    url: authentication/flatin-pt-authentication.yml
+  - type: Conventions
+    url: conventions/flatin-pt-conventions.yml
+  - type: Idempotency
+    url: conventions/flatin-pt-conventions.yml
+  - type: ErrorCatalog
+    url: errors/flatin-pt-problem-types.yml
+  - type: DataModel
+    url: data-model/flatin-pt-data-model.yml
+  - type: Conformance
+    url: conformance/flatin-pt-conformance.yml
+  - type: RateLimits
+    url: rate-limits/flatin-pt-rate-limits.yml
+  - type: Plans
+    url: plans/flatin-pt-plans-pricing.yml
+  - type: ChangeLog
+    url: changelog/flatin-pt-changelog.yml
+  - type: Lifecycle
+    url: lifecycle/flatin-pt-lifecycle.yml
+  - type: Dataset
+    url: https://flatin.pt/api/v1/imi/rates.csv
+  - type: Documentation
+    url: https://flatin.pt/en/tools/api-and-data/
 maintainers:
   - FN: HOLY CHAOS, UNIPESSOAL LDA (flatin.pt)
     email: info@flatin.pt
@@ -117,6 +100,10 @@ generated:
   confidence: 97
   at: '2026-09-16T11:39:19.753Z'
 common:
+  - type: Overlay
+    url: overlays/flatin-pt-openapi-overlay.yaml
+  - type: AgentSkill
+    url: skills/_index.yml
   - type: Website
     url: https://flatin.pt/en/
   - type: DeveloperPortal

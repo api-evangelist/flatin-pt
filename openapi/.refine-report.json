@@ -1,0 +1,19 @@
+{
+  "provider": "flatin-pt",
+  "sources": [
+    "flatin-pt-openapi.json"
+  ],
+  "outputs": [
+    "flatin-pt-public-api-openapi.yml"
+  ],
+  "archived": [
+    "archived openapi/flatin-pt-openapi.json"
+  ],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "flatin-pt-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "apis.yml register: written (+1 apis, 1 total)"
+  ],
+  "skipped": []
+}
