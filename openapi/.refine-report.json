@@ -1,19 +1,20 @@
 {
   "provider": "flatin-pt",
   "sources": [
-    "flatin-pt-openapi.json"
+    "_original/flatin-pt-openapi.json"
   ],
   "outputs": [
     "flatin-pt-public-api-openapi.yml"
   ],
-  "archived": [
-    "archived openapi/flatin-pt-openapi.json"
-  ],
+  "archived": [],
   "errors": [],
   "warnings": [],
   "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
     "flatin-pt-openapi.json: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
-    "apis.yml register: written (+1 apis, 1 total)"
+    "apis.yml register: already-registered"
   ],
-  "skipped": []
+  "skipped": [
+    "flatin-pt-public-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }
