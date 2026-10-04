@@ -58,6 +58,8 @@ apis:
   humanURL: https://flatin.pt/en/tools/api-and-data/
   baseURL: https://flatin.pt/api/v1
   tags:
+  - Public
+  tags_raw:
   - public
   properties:
   - type: OpenAPI
