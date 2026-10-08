@@ -102,6 +102,8 @@ generated:
   confidence: 97
   at: '2026-09-16T11:39:19.753Z'
 common:
+  - type: Plans
+    url: plans/flatin-pt-plans-pricing.yml
   - url: https://flatin.pt/en/articles/
     type: Blog
   - type: Overlay
