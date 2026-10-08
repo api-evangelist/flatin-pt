@@ -29,3 +29,16 @@ plans:
         applies: https://flatin.pt/mcp
     overage: none
     note: The open IMI dataset is licensed CC BY 4.0; successful JSON answers carry an attribution field to display next to the numbers.
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - metered
+  units: []
+  plans:
+  - name: Free
+    access: free
+    model: metered
+    model_how: derived
+    units: []
+    periods: []
