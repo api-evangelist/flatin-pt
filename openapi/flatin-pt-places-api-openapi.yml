@@ -1,0 +1,620 @@
+openapi: 3.2.0
+info:
+  title: flatin.pt Places API
+  summary: 'Portuguese home buying, machine-readable: new-build developments, where-to-live guides, municipality data, IMT and stamp duty (Imposto do Selo) on a purchase, IMI rates for all 308 municipalities.'
+  description: 'Keyless public API of flatin.pt. Numbers are the same as on the site and come from the official tables; every successful JSON answer carries an attribution field — show it next to the numbers. Rate limits: 120 requests per minute per IP address, HTTP 429 with Retry-After when exceeded. Status: https://flatin.pt/status/. MCP server: https://flatin.pt/mcp.'
+  termsOfService: https://flatin.pt/en/legal/terms/
+  contact:
+    name: flatin.pt
+    url: https://flatin.pt/en/tools/api-and-data/
+    email: info@flatin.pt
+  license:
+    name: CC BY 4.0 (data)
+    url: https://creativecommons.org/licenses/by/4.0/
+  version: 1.0.0
+servers:
+- url: https://flatin.pt
+tags:
+- name: Places
+  description: Where to live, municipality figures, construction barometer and the glossary — the same answers as the MCP tools.
+paths:
+  /api/v1/where-to-live:
+    get:
+      tags:
+      - Places
+      summary: 'Where-to-live guides: the list of cities and regions'
+      description: The cities and regions flatin.pt has a where-to-live guide for, with the municipalities each one covers and the guide's address in the requested language.
+      operationId: where_to_live_index_api_v1_where_to_live_get
+      parameters:
+      - name: language
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+          examples:
+          - en
+          enum:
+          - pt
+          - en
+          - ru
+          - ua
+          - de
+          - fr
+          - nl
+          - uk
+          title: Language
+        description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: 'The request was not understood: `error` is one of bad_language, bad_profile, bad_verdict, bad_include, bad_measure, bad_granularity, bad_count, municipality_required, ambiguous (with `candidates` or `suggestions`)'
+          content:
+            application/json:
+              example:
+                error: ambiguous
+                message: '''Vila'' matches several municipalities; pick one'
+                candidates:
+                - code: '0313'
+                  name: Vila Verde
+                  distrito: Braga
+        '404':
+          description: 'Nothing matches: `error` is not_found, with `suggestions` (or `guides`) to pick from'
+          content:
+            application/json:
+              example:
+                error: not_found
+                message: municipality 'Atlantis' is not among the 308
+                suggestions: []
+        '503':
+          description: 'The IMI table is being re-checked: data_unavailable'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/where-to-live/{city}:
+    get:
+      tags:
+      - Places
+      summary: 'Where to live in a city: verdict by area, noise and safety'
+      description: 'The verdict of a flatin.pt guide by area — live (good to live), depends (depends on you) or avoid (we advise against) — with the reason as written on the site, who each area suits, and the sources of its numbers. Sections: noise in plain words (festivals, bars, aircraft under approach paths), safety as dated, sourced police operations (local reputation of a place, never a claim about its residents), prices, municipal housing, climate, transport. `city` is a guide name in any site language, its slug, or a municipality inside a guide (Gaia → Greater Porto). A profile keeps the areas that suit it plus every ''avoid'' area.'
+      operationId: where_to_live_api_v1_where_to_live__city__get
+      parameters:
+      - name: city
+        in: path
+        required: true
+        schema:
+          type: string
+          description: City, region or municipality
+          examples:
+          - Porto
+          title: City
+        description: City, region or municipality
+      - name: language
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+          examples:
+          - en
+          enum:
+          - pt
+          - en
+          - ru
+          - ua
+          - de
+          - fr
+          - nl
+          - uk
+          title: Language
+        description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+      - name: profile
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Keep areas that suit this profile (and every avoid area)
+          enum:
+          - family
+          - car_free
+          - retirees
+          - remote
+          - budget
+          - nightlife
+          title: Profile
+        description: Keep areas that suit this profile (and every avoid area)
+      - name: verdict
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Keep only areas with this verdict
+          enum:
+          - live
+          - depends
+          - avoid
+          title: Verdict
+        description: Keep only areas with this verdict
+      - name: include
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Comma-separated parts of the guide to return. Default: areas,noise,safety. `all` returns every section'
+          examples:
+          - areas,noise,safety,prices
+          title: Include
+        description: 'Comma-separated parts of the guide to return. Default: areas,noise,safety. `all` returns every section'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: 'The request was not understood: `error` is one of bad_language, bad_profile, bad_verdict, bad_include, bad_measure, bad_granularity, bad_count, municipality_required, ambiguous (with `candidates` or `suggestions`)'
+          content:
+            application/json:
+              example:
+                error: ambiguous
+                message: '''Vila'' matches several municipalities; pick one'
+                candidates:
+                - code: '0313'
+                  name: Vila Verde
+                  distrito: Braga
+        '404':
+          description: 'Nothing matches: `error` is not_found, with `suggestions` (or `guides`) to pick from'
+          content:
+            application/json:
+              example:
+                error: not_found
+                message: municipality 'Atlantis' is not among the 308
+                suggestions: []
+        '503':
+          description: 'The IMI table is being re-checked: data_unavailable'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/municipalities/compare:
+    get:
+      tags:
+      - Places
+      summary: Compare 2 to 5 municipalities side by side
+      description: The same figures as /municipalities/{municipality}/stats for two to five municipalities in one answer. Pass `municipalities` as a comma-separated list or repeat the parameter.
+      operationId: municipalities_compare_api_v1_municipalities_compare_get
+      parameters:
+      - name: municipalities
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+          description: Names or four-digit codes, 2 to 5
+          examples:
+          - - Porto
+            - Matosinhos
+            - Vila Nova de Gaia
+          default: []
+          title: Municipalities
+        description: Names or four-digit codes, 2 to 5
+      - name: language
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+          examples:
+          - en
+          enum:
+          - pt
+          - en
+          - ru
+          - ua
+          - de
+          - fr
+          - nl
+          - uk
+          title: Language
+        description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: 'The request was not understood: `error` is one of bad_language, bad_profile, bad_verdict, bad_include, bad_measure, bad_granularity, bad_count, municipality_required, ambiguous (with `candidates` or `suggestions`)'
+          content:
+            application/json:
+              example:
+                error: ambiguous
+                message: '''Vila'' matches several municipalities; pick one'
+                candidates:
+                - code: '0313'
+                  name: Vila Verde
+                  distrito: Braga
+        '404':
+          description: 'Nothing matches: `error` is not_found, with `suggestions` (or `guides`) to pick from'
+          content:
+            application/json:
+              example:
+                error: not_found
+                message: municipality 'Atlantis' is not among the 308
+                suggestions: []
+        '503':
+          description: 'The IMI table is being re-checked: data_unavailable'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-flatin-example: /api/v1/municipalities/compare?municipalities=Porto,Matosinhos
+  /api/v1/municipalities/{municipality}/stats:
+    get:
+      tags:
+      - Places
+      summary: Everything flatin.pt publishes about one municipality
+      description: IMI rate with its history (Autoridade Tributária), INE median sale price per m², purchasing power and population, INE licensed buildings and new dwellings by year, municipal building-works cases by year where we collect them, the construction-barometer row, the number of new-build developments in the catalogue and the where-to-live guides. Every block names its source and its date; a figure that is not published is null, never estimated. `municipality` is a name (any case, accents optional, Lisbon/Oporto accepted) or the four-digit code.
+      operationId: municipality_stats_api_v1_municipalities__municipality__stats_get
+      parameters:
+      - name: municipality
+        in: path
+        required: true
+        schema:
+          type: string
+          description: Name or four-digit code
+          examples:
+          - Porto
+          - '1312'
+          title: Municipality
+        description: Name or four-digit code
+      - name: language
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+          examples:
+          - en
+          enum:
+          - pt
+          - en
+          - ru
+          - ua
+          - de
+          - fr
+          - nl
+          - uk
+          title: Language
+        description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: 'The request was not understood: `error` is one of bad_language, bad_profile, bad_verdict, bad_include, bad_measure, bad_granularity, bad_count, municipality_required, ambiguous (with `candidates` or `suggestions`)'
+          content:
+            application/json:
+              example:
+                error: ambiguous
+                message: '''Vila'' matches several municipalities; pick one'
+                candidates:
+                - code: '0313'
+                  name: Vila Verde
+                  distrito: Braga
+        '404':
+          description: 'Nothing matches: `error` is not_found, with `suggestions` (or `guides`) to pick from'
+          content:
+            application/json:
+              example:
+                error: not_found
+                message: municipality 'Atlantis' is not among the 308
+                suggestions: []
+        '503':
+          description: 'The IMI table is being re-checked: data_unavailable'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/construction-barometer:
+    get:
+      tags:
+      - Places
+      summary: 'Construction barometer: building-works cases and INE licences'
+      description: 'Without `municipality`: the 12-month count of municipal building-works cases for each municipality we collect, the change on the previous 12 months, cases per 1,000 residents, and the fixed-panel index. With `municipality`: our monthly (or yearly) series where we collect it, plus INE''s official yearly series of licensed buildings and new dwellings for any of the 308. A case is not a licence granted and not a building. The full series is at /api/v1/barometer/series.'
+      operationId: construction_barometer_api_v1_construction_barometer_get
+      parameters:
+      - name: municipality
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Name or four-digit code
+          examples:
+          - Porto
+          title: Municipality
+        description: Name or four-digit code
+      - name: measure
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Kind of works. Default: total_works'
+          enum:
+          - total_works
+          - new_build
+          - alter_extend
+          title: Measure
+        description: 'Kind of works. Default: total_works'
+      - name: granularity
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Period of our own series. Default: month'
+          enum:
+          - month
+          - year
+          title: Granularity
+        description: 'Period of our own series. Default: month'
+      - name: language
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+          examples:
+          - en
+          enum:
+          - pt
+          - en
+          - ru
+          - ua
+          - de
+          - fr
+          - nl
+          - uk
+          title: Language
+        description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: 'The request was not understood: `error` is one of bad_language, bad_profile, bad_verdict, bad_include, bad_measure, bad_granularity, bad_count, municipality_required, ambiguous (with `candidates` or `suggestions`)'
+          content:
+            application/json:
+              example:
+                error: ambiguous
+                message: '''Vila'' matches several municipalities; pick one'
+                candidates:
+                - code: '0313'
+                  name: Vila Verde
+                  distrito: Braga
+        '404':
+          description: 'Nothing matches: `error` is not_found, with `suggestions` (or `guides`) to pick from'
+          content:
+            application/json:
+              example:
+                error: not_found
+                message: municipality 'Atlantis' is not among the 308
+                suggestions: []
+        '503':
+          description: 'The IMI table is being re-checked: data_unavailable'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/glossary:
+    get:
+      tags:
+      - Places
+      summary: 'Glossary of Portuguese home-buying terms: the list'
+      description: Every term of the flatin.pt glossary with its Portuguese and English name and its page in the requested language.
+      operationId: glossary_index_api_v1_glossary_get
+      parameters:
+      - name: language
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+          examples:
+          - en
+          enum:
+          - pt
+          - en
+          - ru
+          - ua
+          - de
+          - fr
+          - nl
+          - uk
+          title: Language
+        description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: 'The request was not understood: `error` is one of bad_language, bad_profile, bad_verdict, bad_include, bad_measure, bad_granularity, bad_count, municipality_required, ambiguous (with `candidates` or `suggestions`)'
+          content:
+            application/json:
+              example:
+                error: ambiguous
+                message: '''Vila'' matches several municipalities; pick one'
+                candidates:
+                - code: '0313'
+                  name: Vila Verde
+                  distrito: Braga
+        '404':
+          description: 'Nothing matches: `error` is not_found, with `suggestions` (or `guides`) to pick from'
+          content:
+            application/json:
+              example:
+                error: not_found
+                message: municipality 'Atlantis' is not among the 308
+                suggestions: []
+        '503':
+          description: 'The IMI table is being re-checked: data_unavailable'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/glossary/{term}:
+    get:
+      tags:
+      - Places
+      summary: 'One glossary term: definition, law reference and page'
+      description: Definition, where the term comes up when buying, the articles of law with the official text and the date they were checked. `term` is the term's key, its Portuguese or English name, a name in any site language or an abbreviation (IMT, CPCV, VPT); close spellings are found.
+      operationId: glossary_term_api_v1_glossary__term__get
+      parameters:
+      - name: term
+        in: path
+        required: true
+        schema:
+          type: string
+          description: Term
+          examples:
+          - cpcv
+          title: Term
+        description: Term
+      - name: language
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+          examples:
+          - en
+          enum:
+          - pt
+          - en
+          - ru
+          - ua
+          - de
+          - fr
+          - nl
+          - uk
+          title: Language
+        description: 'Language of the site content in the answer (verdicts, definitions, labels) and of the page links: pt, en, ru, ua (or uk), de, fr, nl. Field names and the summary stay English. Default: en'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: 'The request was not understood: `error` is one of bad_language, bad_profile, bad_verdict, bad_include, bad_measure, bad_granularity, bad_count, municipality_required, ambiguous (with `candidates` or `suggestions`)'
+          content:
+            application/json:
+              example:
+                error: ambiguous
+                message: '''Vila'' matches several municipalities; pick one'
+                candidates:
+                - code: '0313'
+                  name: Vila Verde
+                  distrito: Braga
+        '404':
+          description: 'Nothing matches: `error` is not_found, with `suggestions` (or `guides`) to pick from'
+          content:
+            application/json:
+              example:
+                error: not_found
+                message: municipality 'Atlantis' is not among the 308
+                suggestions: []
+        '503':
+          description: 'The IMI table is being re-checked: data_unavailable'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError

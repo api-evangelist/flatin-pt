@@ -92,6 +92,30 @@ apis:
     url: https://flatin.pt/api/v1/imi/rates.csv
   - type: Documentation
     url: https://flatin.pt/en/tools/api-and-data/
+- aid: flatin-pt:flatin-pt-actions-api
+  name: flatin.pt Actions API
+  description: >-
+    Acting on a person's behalf: a request to a licensed agency (only after the person agrees to the consent
+    text) and an email subscription (double opt-in).
+  humanURL: https://flatin.pt/en/tools/api-and-data/
+  baseURL: https://flatin.pt/api/v1
+  tags:
+  - actions
+  properties:
+  - type: OpenAPI
+    url: openapi/flatin-pt-actions-api-openapi.yml
+- aid: flatin-pt:flatin-pt-places-api
+  name: flatin.pt Places API
+  description: >-
+    Where to live, municipality figures, construction barometer and the glossary — the same answers as
+    the MCP tools.
+  humanURL: https://flatin.pt/en/tools/api-and-data/
+  baseURL: https://flatin.pt/api/v1
+  tags:
+  - places
+  properties:
+  - type: OpenAPI
+    url: openapi/flatin-pt-places-api-openapi.yml
 maintainers:
   - FN: HOLY CHAOS, UNIPESSOAL LDA (flatin.pt)
     email: info@flatin.pt

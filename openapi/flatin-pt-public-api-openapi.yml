@@ -1,9 +1,9 @@
 openapi: 3.2.0
 info:
   title: flatin.pt Public API
-  summary: 'Portuguese property taxes, machine-readable: IMT and stamp duty (Imposto do Selo) on a purchase, IMI rates for all 308 municipalities.'
+  summary: 'Portuguese home buying, machine-readable: new-build developments, where-to-live guides, municipality data, IMT and stamp duty (Imposto do Selo) on a purchase, IMI rates for all 308 municipalities.'
   description: 'Keyless public API of flatin.pt. Numbers are the same as on the site and come from the official tables; every successful JSON answer carries an attribution field — show it next to the numbers. Rate limits: 120 requests per minute per IP address, HTTP 429 with Retry-After when exceeded. Status: https://flatin.pt/status/. MCP server: https://flatin.pt/mcp.'
-  termsOfService: https://flatin.pt/en/legal/termos-utilizacao/
+  termsOfService: https://flatin.pt/en/legal/terms/
   contact:
     name: flatin.pt
     url: https://flatin.pt/en/tools/api-and-data/
@@ -73,6 +73,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/imi/rates.geojson:
+    get:
+      tags:
+      - Public
+      summary: IMI rates with municipality boundaries (GeoJSON)
+      description: 'Open data for GIS: a GeoJSON FeatureCollection (WGS 84) with one polygon per municipality and flat properties `codigo`, `municipality`, `distrito`, `year`, `urban_available`, `urban_rate_percent` (a number, 0.3 means 0.3 %), `urban_reason`, `rural_rate_percent` and `page`. Where a municipality sets no single rate the rate is null, `urban_available` is false and `urban_reason` says why; never zero. Boundaries: CAOP (Direção-Geral do Território), simplified, CC BY 4.0, credit in the `boundaries` member. `year` selects a verified past table.'
+      operationId: imi_rates_geojson_api_v1_imi_rates_geojson_get
+      parameters:
+      - name: year
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Year
+      responses:
+        '200':
+          description: GeoJSON FeatureCollection
+          content:
+            application/geo+json: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/imi/rates-history.csv:
+    get:
+      tags:
+      - Public
+      summary: Every verified year of IMI rates in one CSV file
+      description: 'Open data: one row per municipality per verified tax year (long format), columns `codigo`, `municipality`, `municipality_as_published`, `distrito`, `year`, `urban_rate_percent`, `rural_rate_percent` (numbers, 0.3 means 0.3 %) and `verified_on` (the date the year was checked against the source). An empty rate cell means the municipality sets no single rate, not zero. CC BY 4.0.'
+      operationId: imi_rates_history_csv_api_v1_imi_rates_history_csv_get
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv: {}
   /api/v1/imi/rates/{codigo}:
     get:
       tags:
@@ -106,7 +145,7 @@ paths:
       tags:
       - Public
       summary: What a purchase costs on top of the price
-      description: 'IMT (property transfer tax), Imposto do Selo (stamp duty) and an estimate for the deed and registration. Body: `value` (price in euros), optional `territory` (`continente` or `regioes_autonomas`), `primary_home` (default true) and `buyer_is_young` (35 or under, default false). Invalid input gets 422 with `error` and `field`.'
+      description: 'IMT (property transfer tax), Imposto do Selo (stamp duty) and the property registration. Body: `value` (the contract price in euros), optional `territory` (`continente` or `regioes_autonomas`), `primary_home` (default true) and `buyer_is_young` (default false: 35 or under, first own permanent home, not an IRS dependant, no residential property owned in the previous three years), `non_resident` (default false: true for a buyer who is not and has never been tax resident in Portugal), `tax_haven_company` (default false: true when the buyer is a company or other entity with its tax domicile in a jurisdiction on the Portuguese list of more favourable tax regimes, or controlled by one; never an individual), and `vpt` (the valor patrimonial tributário from the caderneta predial, in euros; optional). A non-resident buyer pays IMT at a flat rate with no exemption or reduction (CIMT art. 17.º n.º 10): `imt_regime` is `non_resident_flat` instead of `tables`, the young buyers'' table and the stamp duty deduction do not apply, and `annullable` gives what the Tax Authority annuls on request if the buyer becomes tax resident within the window or lets the home at a moderate rent (n.º 11–12) — two amounts, the months of each window and the request deadline. For a resident buyer `annullable` is null. A listed-regime company pays 10 % with no exemption or reduction (CIMT art. 17.º n.º 4), even when it is resident and even with `non_resident`: `imt_regime` is `tax_haven_flat` and `annullable` is null. IMT and stamp duty are charged on the higher of the contract price and the VPT (CIMT art. 12.º n.º 1; Código do Imposto do Selo art. 9.º n.º 4): `taxable_value_cents` is that base and `taxable_base` says which one it is (`price` or `vpt`). Without `vpt` the base is the price, and a higher VPT would make both taxes higher. `notary_estimate_cents` is the published price of one registration act at the Casa Pronta counter of the Ministério da Justiça. It does not cover the purchase contract at a notary, buying with a mortgage (a second registration act plus stamp duty on the loan) or the agency''s fee — see `notes`. Annual IMI is not part of `total_cents`: it is charged on the VPT, not on the price — see /api/v1/imi/rates/{codigo} for the rate. For a young buyer the reduced IMT table applies and stamp duty is reduced by the deduction of art. 7.º-A of the Código do Imposto do Selo: `stamp_duty_cents` is the amount due, `stamp_duty_relief_cents` the deduction. Invalid input gets 422 with `error` and `field`.'
       operationId: imt_calculate_api_v1_imt_calculate_post
       requestBody:
         content:
@@ -128,17 +167,262 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/barometer/series.csv:
+    get:
+      tags:
+      - Public
+      summary: 'Building-permit barometer: monthly case counts per municipality'
+      description: 'Open data (CC BY 4.0). One row per municipality, period and measure. `cases` counts municipal building-works cases entering the licensing pipeline, dated by that municipality''s declared reference event — not licences granted, and not dwellings. `measure` follows the INE breakdown: new_build, alter_extend, total_works, plus unclassified (cases whose works type the municipality does not state) and pip (preliminary enquiries, counted apart). `provisional` marks periods the source layer is still back-filling. `vintage` is the day the series was snapshotted: pass it back to reproduce a citation. Every row carries the source layer it was counted from.'
+      operationId: barometer_series_csv_api_v1_barometer_series_csv_get
+      parameters:
+      - name: granularity
+        in: query
+        required: false
+        schema:
+          type: string
+          default: month
+          title: Granularity
+      - name: vintage
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Vintage
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/barometer/series:
+    get:
+      tags:
+      - Public
+      summary: The same barometer series as JSON, with attribution
+      description: 'The same rows as the CSV, plus an `attribution` object naming both data sources separately: our own counts from municipal GIS layers, and the official INE series used as context and as the population denominator.'
+      operationId: barometer_series_api_v1_barometer_series_get
+      parameters:
+      - name: granularity
+        in: query
+        required: false
+        schema:
+          type: string
+          default: month
+          title: Granularity
+      - name: vintage
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Vintage
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/barometer/official.csv:
+    get:
+      tags:
+      - Public
+      summary: The official INE series the barometer is checked against
+      description: 'Open data (CC BY 4.0, source INE). Licensed buildings and dwellings per municipality, and resident population, exactly as INE publishes them — no processing of ours beyond reshaping. Each row carries the exact INE API call it came from and the date INE last updated that indicator. Note on municipality_code: it is DICOFRE on the mainland, but for the thirty municipalities of the Azores and Madeira it is the tax authority''s own code (Funchal is 2203, not 3103), because that is the key the rest of this site uses. municipality_as_ine_publishes_it carries INE''s own name for the row.'
+      operationId: barometer_official_csv_api_v1_barometer_official_csv_get
+      parameters:
+      - name: series
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Series
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/barometer/sce.csv:
+    get:
+      tags:
+      - Public
+      summary: ADENE energy-certificate statistics (SCE) for new housing
+      description: 'Mirror of ADENE''s public SCE statistics, per month and municipality, for two measures: precert_new_housing (context ''Projeto Edifícios Novos'', type ''Habitação'') and completed_new_housing (context ''Edifícios Concluídos Novos'', type ''Habitação''). Source: ADENE — SCE; credit it as such. A pre-certificate is issued for every dwelling at the DESIGN stage: it is not a building licence and not a construction start, and this series is not comparable one-to-one with INE''s licensed dwellings. certificates is the sum over energy classes; avg_useful_area_m2 is the certificate-weighted mean of ADENE''s per-class averages. A municipality with no row in a month had zero certificates that month (ADENE prints only non-zero rows). Coverage: mainland Portugal and Madeira. Note on municipality_code: DICOFRE on the mainland, but for Madeira it is the tax authority''s code (Funchal is 2203, not 3103), the same key as the rest of this site. Each row carries the ADENE file it came from, that file''s sha256 and the day we fetched it.'
+      operationId: barometer_sce_csv_api_v1_barometer_sce_csv_get
+      parameters:
+      - name: measure
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Measure
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/newbuilds:
+    get:
+      tags:
+      - Public
+      summary: Search new-build projects in Portugal
+      description: 'Published new-build projects (empreendimentos) with filters: municipality (Portuguese name, slug or four-digit code), parish, typology (T0–T5, repeatable; T5 means five bedrooms or more), price_min and price_max in euros, stage (planned, licensed, building, selling, delivered), delivery_by (year; completed or promised for that year or earlier, overdue promises included), energy_class (A+…F, repeatable), on_sale, sort (price, name, delivery, new), limit (1–50, default 10) and offset. language (pt, en, ru, ua, de, fr, nl) picks the language of page URLs and labels. Every result carries its canonical page URL; catalog_url is the same selection on the site.'
+      operationId: newbuilds_search_api_v1_newbuilds_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: 'A parameter is not valid: error, field, message'
+      x-flatin-example: /api/v1/newbuilds?municipality=Porto
+  /api/v1/newbuilds/{slug}:
+    get:
+      tags:
+      - Public
+      summary: 'One new-build project: prices, status, purchase cost, nearby'
+      description: 'One published project by slug (or its page URL): prices and units per typology, price history, construction stage and delivery promises, linked building permits, the developer, the full purchase cost at the cheapest available price (IMT, stamp duty, registration; primary_home and buyer_is_young adjust it), nearby transport, schools, health, shops and parks, and the canonical page URL in each of the seven languages.'
+      operationId: newbuild_detail_api_v1_newbuilds__slug__get
+      parameters:
+      - name: slug
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Slug
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '400':
+          description: A parameter is not valid
+        '404':
+          description: No published project with this slug
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-flatin-example: /api/v1/newbuilds?limit=1
+  /api/v1/reports/obra-nova.json:
+    get:
+      tags:
+      - Public
+      summary: 'Monthly report ''Obra nova em Portugal'': list of editions'
+      description: Every published edition of the monthly new-build report, newest first, with links to its page, CSV and JSON. Editions are frozen on their publication day.
+      operationId: report_editions_api_v1_reports_obra_nova_json_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /api/v1/reports/obra-nova/{edition}.csv:
+    get:
+      tags:
+      - Public
+      summary: One edition of the monthly new-build report as CSV
+      description: 'Open data (CC BY 4.0, see the Link header). One row per municipality plus a national row (`municipality_code` = PT): INE dwellings licensed in new buildings (3-month window and the same window a year before, and the latest full year), INE median €/m² of new-dwelling sales, and the flatin.pt catalogue (developments, units for sale, entry price, median asking €/m²) and barometer. `edition` is YYYY-MM or `latest`.'
+      operationId: report_csv_api_v1_reports_obra_nova__edition__csv_get
+      parameters:
+      - name: edition
+        in: path
+        required: true
+        schema:
+          type: string
+          description: Edition month YYYY-MM, or `latest`
+          examples:
+          - latest
+          title: Edition
+        description: Edition month YYYY-MM, or `latest`
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/reports/obra-nova/{edition}.json:
+    get:
+      tags:
+      - Public
+      summary: One edition of the monthly new-build report as JSON, with attribution
+      description: The same rows as the CSV plus an `attribution` object naming each source and how to cite the edition. `edition` is YYYY-MM or `latest`.
+      operationId: report_json_api_v1_reports_obra_nova__edition__json_get
+      parameters:
+      - name: edition
+        in: path
+        required: true
+        schema:
+          type: string
+          description: Edition month YYYY-MM, or `latest`
+          examples:
+          - latest
+          title: Edition
+        description: Edition month YYYY-MM, or `latest`
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/where-to-live.csv:
+    get:
+      tags:
+      - Public
+      summary: 'Where to live in Portugal: the city guides compared, as CSV'
+      description: 'Open data (CC BY 4.0, see the Link header): one row per flatin.pt ''where to live'' city guide. IMI urban rate (min and max over the guide''s municipalities, Portal das Finanças table for imi_year); INE median sale price per m2 (latest fresh quarter, min and max); new-build supply in the flatin.pt catalogue (developments, units for sale, median asking price per m2 over units with a floor area, only from 5 such units up); counts of areas the guide rates good / depends / avoid and of places named for recent police operations (dated official source, at most 24 months old). An empty cell means we hold no number, not zero.'
+      operationId: where_cities_csv_api_v1_where_to_live_csv_get
+      responses:
+        '200':
+          description: CSV file
+          content:
+            text/csv: {}
 components:
   schemas:
-    HTTPValidationError:
-      properties:
-        detail:
-          items:
-            $ref: '#/components/schemas/ValidationError'
-          type: array
-          title: Detail
-      type: object
-      title: HTTPValidationError
     ValidationError:
       properties:
         loc:
@@ -165,3 +449,12 @@ components:
       - msg
       - type
       title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError

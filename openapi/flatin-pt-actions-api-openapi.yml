@@ -1,0 +1,111 @@
+openapi: 3.2.0
+info:
+  title: flatin.pt Actions API
+  summary: 'Portuguese home buying, machine-readable: new-build developments, where-to-live guides, municipality data, IMT and stamp duty (Imposto do Selo) on a purchase, IMI rates for all 308 municipalities.'
+  description: 'Keyless public API of flatin.pt. Numbers are the same as on the site and come from the official tables; every successful JSON answer carries an attribution field — show it next to the numbers. Rate limits: 120 requests per minute per IP address, HTTP 429 with Retry-After when exceeded. Status: https://flatin.pt/status/. MCP server: https://flatin.pt/mcp.'
+  termsOfService: https://flatin.pt/en/legal/terms/
+  contact:
+    name: flatin.pt
+    url: https://flatin.pt/en/tools/api-and-data/
+    email: info@flatin.pt
+  license:
+    name: CC BY 4.0 (data)
+    url: https://creativecommons.org/licenses/by/4.0/
+  version: 1.0.0
+servers:
+- url: https://flatin.pt
+tags:
+- name: Actions
+  description: 'Acting on a person''s behalf: a request to a licensed agency (only after the person agrees to the consent text) and an email subscription (double opt-in).'
+paths:
+  /api/v1/consultation:
+    post:
+      tags:
+      - Actions
+      summary: Send a request to a licensed real estate agency (two steps)
+      description: 'The same as the MCP tool `request_consultation`, with the same body. `mode`: `link` (default) returns the form link and the consent text; `prepare` checks the details (`name`, `phone` + `channel` or else `email`, `city` or `project`, `language`, optional `budget`, `typology`, `intent`, `message`, `client`) and returns a `summary`, the GDPR consent text in the person''s language, its `consent_text_version` and a `confirmation_token` (valid 30 minutes, not before 5 seconds); nothing is sent. `submit` sends the request to a licensed agency: the same details plus `confirmation_token`, `consent: true` and `consent_text_version` — only after the person has read the consent text and explicitly agreed. Changed details, a missing consent or an outdated text version are refused. The answer to `submit` is the same whether the request is new, a repeat or merged into an open one. Refusals: 422 with `error`, `message` and `field` or `problems`; 429 with `Retry-After` (30 prepares and 10 submits an hour per address, 5 accepted requests an hour per address).'
+      operationId: consultation_api_v1_consultation_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              type: object
+              title: Body
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/subscriptions:
+    post:
+      tags:
+      - Actions
+      summary: Subscribe an email to new developments or construction
+      description: 'The same as the MCP tool `subscribe_digest`, with the same body: `email`, `what` (`new_developments`, daily, the default; or `construction`, newly licensed construction, weekly), `city`, `parish` (construction only), `typology`, `price_min`, `price_max`, `on_sale`, `language`. It only sends a confirmation email (double opt-in): nothing is active until the person clicks the link, within 7 days. The answer is the same for a new address, a subscribed one and a repeat. Refusals: 422 with `error` and `field`; 429 with `Retry-After` (10 an hour per address, shared with the site''s forms).'
+      operationId: subscriptions_api_v1_subscriptions_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              type: object
+              title: Body
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
